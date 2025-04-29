@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Image Prediction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+        }
+        input[type="file"] {
+            margin: 20px 0;
+        }
+        img {
+            max-width: 100%;
+            margin-top: 20px;
+        }
+        #result {
+            font-size: 20px;
+            margin-top: 20px;
+            color: green;
+        }
+        #description {
+            font-size: 16px;
+            margin-top: 10px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Upload an Image for Prediction</h1>
+
+    <input type="file" id="fileInput" accept="image/*">
+    <br>
+    <button onclick="uploadImage()">Predict</button>
+
+    <div id="result"></div>
+    <div id="description"></div>
+
+    <img id="preview" src="#" alt="Image Preview" style="display:none;"/>
+
+    <script>
+        async function uploadImage() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert("Please select a file first.");
+                return;
+            }
+
+            // Preview the image
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('preview');
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const response = await fetch('/predict', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            
+            // Display the class name and description
+            const prediction = result.prediction;
+            document.getElementById('result').innerText = "Prediction: " + prediction.name;
+            document.getElementById('description').innerText = "Description: " + prediction.description;
+        }
+    </script>
+
+</body>
+</html>
